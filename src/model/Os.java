@@ -4,6 +4,9 @@
  */
 package model;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -115,6 +118,18 @@ public class Os {
 
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
+    }
+    
+    // Método para obter a data formatada
+    public String getDataOsFormatada() {
+        // Converte Date para LocalDateTime
+        LocalDateTime localDateTime = dataOs.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        // Formata a data
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return localDateTime.format(formato);
     }
 
     

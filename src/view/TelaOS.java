@@ -6,12 +6,21 @@ import controller.OsDAO;
 import java.sql.*;
 
 import java.awt.HeadlessException;
+import java.beans.PropertyVetoException;
+import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.Cliente;
 import model.Os;
+import static view.TelaPrincipal.jDesktopPane;
 
 /**
  * Tela de gestão do sistema
@@ -32,7 +41,7 @@ public class TelaOS extends javax.swing.JInternalFrame {
     public TelaOS() {
         initComponents();
     }
-    
+
     /**
      * Método usado para recuperar o número da OS
      */
@@ -77,78 +86,13 @@ public class TelaOS extends javax.swing.JInternalFrame {
         }
 
     }
-    
-    
-    
-    
-
-    /**
-     * Método responsável pela edição de uma Ordem de Seviço
-     */
-    private void editarOs() {
-        String sql = "update tbos set tipo=?,situacao=?,equipamento=?,defeito=?,servico=?,tecnico=?,valor=? where os=?";
-        try {
-            conexao = ModuloConexao.conectar();
-            pst = conexao.prepareStatement(sql);
-            pst.setString(1, tipo);
-            pst.setString(2, jCBXOsSit.getSelectedItem().toString());
-            pst.setString(3, jTxtOsEquip.getText());
-            pst.setString(4, jTxtOsDef.getText());
-            pst.setString(5, jTxtOsServ.getText());
-            pst.setString(6, jTxtOsTec.getText());
-            pst.setString(7, jTxtOsValor.getText().replace(",", "."));
-            pst.setString(8, jTxtOs.getText());
-            if ((jTxtIdCliente.getText().isEmpty()) || (jTxtOsEquip.getText().isEmpty()) || (jTxtOsDef.getText().isEmpty()) || jCBXOsSit.getSelectedItem().equals(" ")) {
-                JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");
-            } else {
-                int adicionado = pst.executeUpdate();
-                if (adicionado > 0) {
-                    JOptionPane.showMessageDialog(null, "OS alterada com sucesso");
-                    limpar();
-                }
-            }
-        } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, e);
-        } finally {
-            try {
-                conexao.close();
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, ex);
-            }
-        }
-    }
 
     /**
      * Método responsável pela exclusão de uma Ordem de Serviço
      */
     private void excluirOs() {
         conexao = ModuloConexao.conectar();
-        String verifica = jCBXOsSit.getSelectedItem().toString();
-        if (verifica.equals("Retirado")) {
-            int confirma = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja excluir esta OS?", "Atenção", JOptionPane.YES_NO_OPTION);
-            if (confirma == JOptionPane.YES_OPTION) {
-                String sql = "delete from tbos where os=?";
-                try {
-                    pst = conexao.prepareStatement(sql);
-                    pst.setString(1, jTxtOs.getText());
-                    int apagado = pst.executeUpdate();
-                    if (apagado > 0) {
-                        limpar();
-                        JOptionPane.showMessageDialog(null, "OS excluída com sucesso");
-                    }
-                } catch (HeadlessException | SQLException e) {
-                    JOptionPane.showMessageDialog(null, e);
-                } finally {
-                    try {
-                        conexao.close();
-                    } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null, ex);
-                    }
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Para excluir esta OS é necessário modificar\no status para \"Retirado\"");
-        }
+
     }
 
     /**
@@ -169,8 +113,6 @@ public class TelaOS extends javax.swing.JInternalFrame {
 //            }
 //        }
 //    }
-    
-
     /**
      * Método responsável por limpar os campos e gerenciar os componentes
      */
@@ -648,43 +590,98 @@ public class TelaOS extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jBtnOsAdicionarActionPerformed
 
     private void jBtnOsPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnOsPesquisarActionPerformed
-        int num_os = Integer.parseInt(JOptionPane.showInputDialog("Número da OS"));
-        OsDAO dao = new OsDAO();
-        Os obj = new Os();
-        obj = dao.consultarOS(num_os);
-        
-        if(obj.getTipo().equalsIgnoreCase("Orçamento")){
-            rbtOrc.setSelected(true);
-        }else{
-            rbtOs.setSelected(true);
+//        int num_os = Integer.parseInt(JOptionPane.showInputDialog("Número da OS"));
+//        OsDAO dao = new OsDAO();
+//        Os obj = new Os();
+//        obj = dao.consultarOS(num_os);
+//        if (obj != null) {
+//            if (obj.getTipo().equalsIgnoreCase("Orçamento")) {
+//                rbtOrc.setSelected(true);
+//            } else {
+//                rbtOs.setSelected(true);
+//            }
+//            jTxtOs.setText(String.valueOf(obj.getOs()));
+//            txtData.setText(String.valueOf(obj.getDataOs()));
+//            //txtData.setText(obj.getDataOsFormatada());
+//            jTxtOsEquip.setText(obj.getEquipamento());
+//            jCBXOsSit.setSelectedItem(obj.getSituacao());
+//            jTxtOsDef.setText(obj.getDefeito());
+//            jTxtOsServ.setText(obj.getServico());
+//            jTxtOsTec.setText(obj.getTecnico());
+//            jTxtOsValor.setText(String.valueOf(obj.getValor()));
+//            jTxtIdCliente.setText(String.valueOf(obj.getCliente().getId()));
+//            jBtnOsAdicionar.setEnabled(false);
+//            jBtnOsPesquisar.setEnabled(false);
+//            jTxtPesquisar.setEnabled(false);
+//            jTblClientes.setVisible(false);
+//            jBtnOsAlterar.setEnabled(true);
+//            jBtnOsExcluir.setEnabled(true);
+//            jBtnOsImprimir.setEnabled(true);
+//        }
+           try {
+            TelaConsultaOS tela = new TelaConsultaOS();
+            tela.setVisible(rootPaneCheckingEnabled);
+            tela.setMaximum(true);
+            jDesktopPane.add(tela);
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(TelaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
-        jTxtOs.setText(String.valueOf(obj.getOs()));
-        txtData.setText(String.valueOf(obj.getDataOs()));
-        jTxtOsEquip.setText(obj.getEquipamento());
-        jCBXOsSit.setSelectedItem(obj.getSituacao());
-        jTxtOsDef.setText(obj.getDefeito());
-        jTxtOsServ.setText(obj.getServico());
-        jTxtOsTec.setText(obj.getTecnico());
-        jTxtOsValor.setText(String.valueOf(obj.getValor()));
-        jTxtIdCliente.setText(String.valueOf(obj.getCliente().getId()));
-        jBtnOsAdicionar.setEnabled(false);
-        jBtnOsPesquisar.setEnabled(false);
-        jTxtPesquisar.setEnabled(false);
-        jTblClientes.setVisible(false);
-        jBtnOsAlterar.setEnabled(true);
-        jBtnOsExcluir.setEnabled(true);
-        jBtnOsImprimir.setEnabled(true);
-        
-        
 
     }//GEN-LAST:event_jBtnOsPesquisarActionPerformed
 
     private void jBtnOsAlterarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnOsAlterarActionPerformed
-        editarOs();
+        if ((jTxtIdCliente.getText().isEmpty()) || (jTxtOsEquip.getText().isEmpty()) || (jTxtOsDef.getText().isEmpty()) || jCBXOsSit.getSelectedItem().equals(" ")) {
+            JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");
+        }
+        try {
+            Os obj = new Os();
+        if (rbtOrc.isSelected()) {
+            obj.setTipo(rbtOrc.getText());
+        } else {
+            obj.setTipo(rbtOs.getText());
+        }
+        obj.setSituacao(jCBXOsSit.getSelectedItem().toString());
+        obj.setEquipamento(jTxtOsEquip.getText());
+        obj.setDefeito(jTxtOsDef.getText());
+        obj.setServico(jTxtOsServ.getText());
+        obj.setTecnico(jTxtOsTec.getText());
+        obj.setValor(Double.valueOf(jTxtOsValor.getText().replace(",", ".")));
+        obj.setOs(Integer.valueOf(jTxtOs.getText()));
+        Cliente cliente = new Cliente();
+        cliente.setId(Integer.valueOf(jTxtIdCliente.getText()));
+        obj.setCliente(cliente);
+        if ((jTxtIdCliente.getText().isEmpty()) || (jTxtOsEquip.getText().isEmpty()) || (jTxtOsDef.getText().isEmpty()) || jCBXOsSit.getSelectedItem().equals(" ")) {
+            JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");
+        } else {
+            OsDAO os = new OsDAO();
+            os.editarOS(obj);
+        }
+        jBtnOsAdicionar.setEnabled(false);
+        jBtnOsPesquisar.setEnabled(true);
+        jTxtPesquisar.setEnabled(false);
+        jTblClientes.setVisible(false);
+        jBtnOsAlterar.setEnabled(false);
+        jBtnOsExcluir.setEnabled(true);
+        jBtnOsImprimir.setEnabled(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        limpar();
     }//GEN-LAST:event_jBtnOsAlterarActionPerformed
 
     private void jBtnOsExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnOsExcluirActionPerformed
-        excluirOs();
+        if (jCBXOsSit.getSelectedItem().toString().equals("Retirado")) {
+            int confirma = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja excluir esta OS?", "Atenção", JOptionPane.YES_NO_OPTION);
+            if (confirma == JOptionPane.YES_OPTION) {
+                Os obj = new Os();
+                obj.setOs(Integer.valueOf(jTxtOs.getText()));
+                OsDAO dao = new OsDAO();
+                dao.excluirOs(obj);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Para excluir esta OS é necessário modificar\no status para \"Retirado\"");
+        }
+        limpar();
     }//GEN-LAST:event_jBtnOsExcluirActionPerformed
 
     private void formInternalFrameOpened(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameOpened

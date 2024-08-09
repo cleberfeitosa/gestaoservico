@@ -32,6 +32,8 @@ public class OsDAO {
     String emitirOS = "insert into tbos(tipo,situacao,equipamento,defeito,servico,tecnico,valor,idcli) values(?,?,?,?,?,?,?,?)";
     String buscarOS = "select os,data_os,tipo,situacao,equipamento,defeito,servico,tecnico,valor,idcli from tbos where os= ?";
     String maxOs = "select max(os) from tbos";
+    String editarOS = "update tbos set tipo=?,situacao=?,equipamento=?,defeito=?,servico=?,tecnico=?,valor=? where os=?";
+    String excluirOS = "delete from tbos where os=?";
 
     /**
      * Método responsável pela emissão de uma Ordem de Serviço
@@ -93,8 +95,13 @@ public class OsDAO {
                 cliente.setId(rs.getInt(10));
                 obj.setCliente(cliente);
 
+             return obj;
             }
-            return obj;
+            
+            else{
+                JOptionPane.showMessageDialog(null, "Ordem de Serviço não encontrada!");
+            }
+           
         } catch (SQLSyntaxErrorException e) {
             JOptionPane.showMessageDialog(null, "OS Inválida");
         } catch (HeadlessException | SQLException e) {
@@ -108,20 +115,17 @@ public class OsDAO {
         }
         return null;
     }
-    
+
     /**
      * Método usado para recuperar o número da OS
-     *//**
-     * Método usado para recuperar o número da OS
      */
-    
     public Os recuperarOs() {
         Os obj = new Os();
         try {
             conexao = ModuloConexao.conectar();
             ps = conexao.prepareStatement(maxOs);
             rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 obj.setOs(rs.getInt(1));
             }
@@ -136,5 +140,67 @@ public class OsDAO {
             }
         }
         return null;
+    }
+
+    /**
+     * Método responsável pela edição de uma Ordem de Seviço
+     */
+    public void editarOS(Os obj) {
+        try {
+//String editarOS = "update tbos set tipo=?,situacao=?,equipamento=?,defeito=?,servico=?,tecnico=?,valor=? where os=?";
+            conexao = ModuloConexao.conectar();
+            ps = conexao.prepareStatement(editarOS);
+
+            ps.setString(1, obj.getTipo());
+            ps.setString(2, obj.getSituacao());
+            ps.setString(3, obj.getEquipamento());
+            ps.setString(4, obj.getDefeito());
+            ps.setString(5, obj.getServico());
+            ps.setString(6, obj.getTecnico());
+            ps.setDouble(7, obj.getValor());
+            //ps.setInt(8, obj.getCliente().getId());
+            ps.setInt(8, obj.getOs());
+
+            ps.execute();
+            ps.close();
+            JOptionPane.showMessageDialog(null, "OS alterada com Sucesso!");
+
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, e);
+        } finally {
+            try {
+                conexao.close();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex);
+            }
+        }
+        
+    }
+
+    /**
+     * Método responsável pela exclusão de uma Ordem de Serviço
+     */
+    public void excluirOs(Os obj) {
+        
+        try {
+        conexao = ModuloConexao.conectar();
+        ps = conexao.prepareStatement(excluirOS);
+        
+        ps.setInt(1, obj.getOs());
+        
+        ps.executeUpdate();
+        
+        
+        JOptionPane.showMessageDialog(null, "OS excluída com sucesso");
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, e);
+        } finally {
+            try {
+                conexao.close();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex);
+            }
+        }
+
     }
 }
